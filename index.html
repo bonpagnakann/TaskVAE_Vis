@@ -5,14 +5,41 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GitHub Pages Visualization</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-        a { text-decoration: none; color: blue; font-size: 20px; }
-        a:hover { color: darkblue; }
+        body { 
+            font-family: Arial, sans-serif; 
+            text-align: center; 
+            padding: 20px; 
+        }
+        h1 { color: #333; }
+        .button-container {
+            margin-top: 30px;
+        }
+        .button {
+            display: inline-block;
+            margin: 10px;
+            padding: 15px 25px;
+            font-size: 18px;
+            color: white;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+        .button:hover {
+            background-color: #0056b3;
+        }
     </style>
 </head>
 <body>
     <h1>Welcome to My GitHub Pages Visualization</h1>
-    <p>Click below to view the visualization:</p>
-    <a href="UCI.html">View UCI Dataset Visualization</a>
+    <p>Click on a dataset to view its visualizations:</p>
+
+    <div class="button-container">
+        <a href="HHAR.html" class="button">HHAR Visualization</a>
+        <a href="RealWorld.html" class="button">RealWorld Visualization</a>
+        <a href="PAMAP.html" class="button">PAMAP Visualization</a>
+        <a href="UCI.html" class="button">UCI Visualization</a>
+    </div>
 </body>
 </html>
