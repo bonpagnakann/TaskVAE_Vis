@@ -7483,78 +7483,7 @@ a.anchor-link {
 <div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">display</span><span class="p">,</span> <span class="n">HTML</span>
-
-<span class="c1"># Define dataset structure</span>
-<span class="n">scenario_map</span> <span class="o">=</span> <span class="p">{</span>
-    <span class="s1">'UCI'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'3111'</span><span class="p">,</span> <span class="s1">'222'</span><span class="p">,</span> <span class="s1">'231'</span><span class="p">,</span> <span class="s1">'321'</span><span class="p">,</span> <span class="s1">'33'</span><span class="p">,</span> <span class="s1">'42'</span><span class="p">]</span>
-<span class="p">}</span>
-<span class="n">persons</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"P0_Results"</span><span class="p">,</span> <span class="s2">"P1_Results"</span><span class="p">,</span> <span class="s2">"P2_Results"</span><span class="p">]</span>
-<span class="n">acc_types</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"All_Acc"</span><span class="p">,</span> <span class="s2">"New_Acc"</span><span class="p">,</span> <span class="s2">"Old_Acc"</span><span class="p">]</span>
-
-<span class="c1"># Function to find the latest task number from boxplot filenames</span>
-<span class="k">def</span> <span class="nf">find_latest_task</span><span class="p">(</span><span class="n">folder_path</span><span class="p">):</span>
-    <span class="n">boxplot_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sa">r</span><span class="s2">".*_Box_plot_Acc_Task_\d+\.png$"</span><span class="p">,</span> <span class="n">f</span><span class="p">)]</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">boxplot_files</span><span class="p">:</span>
-        <span class="k">return</span> <span class="kc">None</span>
-    <span class="n">latest_file</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">boxplot_files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">f</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">"Task_(\d+)"</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)))</span>
-    <span class="k">return</span> <span class="n">latest_file</span>
-
-<span class="c1"># Loop through datasets, scenarios, and persons</span>
-<span class="k">for</span> <span class="n">dataset</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">scenario_map</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
-    <span class="n">scenarios</span> <span class="o">=</span> <span class="n">scenario_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="p">[])</span>
-    <span class="k">for</span> <span class="n">scenario</span> <span class="ow">in</span> <span class="n">scenarios</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">person</span> <span class="ow">in</span> <span class="n">persons</span><span class="p">:</span>
-            <span class="n">html_content</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"&lt;h3&gt;</span><span class="si">{</span><span class="n">dataset</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2"> - </span><span class="si">{</span><span class="n">person</span><span class="si">}</span><span class="s2">&lt;/h3&gt;"</span>
-            <span class="n">html_content</span> <span class="o">+=</span> <span class="s1">'&lt;table style="border-collapse: collapse;"&gt;&lt;tr&gt;'</span>
-
-            <span class="c1"># Collect images for this scenario &amp; person</span>
-            <span class="n">row1</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># First row (Boxplot + All_Acc Barchart)</span>
-            <span class="n">row2</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Second row (New_Acc + Old_Acc Barcharts)</span>
-
-            <span class="k">for</span> <span class="n">acc</span> <span class="ow">in</span> <span class="n">acc_types</span><span class="p">:</span>
-                <span class="n">folder_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">dataset</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">person</span><span class="si">}</span><span class="s2">/Figures/</span><span class="si">{</span><span class="n">acc</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-
-                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">folder_path</span><span class="p">):</span>
-                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"❌ Folder Not Found: </span><span class="si">{</span><span class="n">folder_path</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>  <span class="c1"># Debug</span>
-                    <span class="k">continue</span>
-
-                <span class="c1"># Find the boxplot for All_Acc (only need one)</span>
-                <span class="k">if</span> <span class="n">acc</span> <span class="o">==</span> <span class="s2">"All_Acc"</span><span class="p">:</span>
-                    <span class="n">latest_boxplot_file</span> <span class="o">=</span> <span class="n">find_latest_task</span><span class="p">(</span><span class="n">folder_path</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">latest_boxplot_file</span><span class="p">:</span>
-                        <span class="n">boxplot_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="n">latest_boxplot_file</span><span class="p">)</span>
-                        <span class="n">rel_boxplot_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">boxplot_path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>  <span class="c1"># Relative path</span>
-                        <span class="n">row1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;td&gt;&lt;img src="</span><span class="si">{</span><span class="n">rel_boxplot_path</span><span class="si">}</span><span class="s1">" width="400"&gt;&lt;/td&gt;'</span><span class="p">)</span>
-
-                <span class="c1"># Find the bar chart for each acc type</span>
-                <span class="n">barchart_file</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">folder_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"Acc.png"</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"Box_plot"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">f</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">barchart_file</span><span class="p">:</span>
-                    <span class="n">barchart_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">folder_path</span><span class="p">,</span> <span class="n">barchart_file</span><span class="p">)</span>
-                    <span class="n">rel_barchart_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">barchart_path</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">())</span>  <span class="c1"># Relative path</span>
-
-                    <span class="k">if</span> <span class="n">acc</span> <span class="o">==</span> <span class="s2">"All_Acc"</span><span class="p">:</span>
-                        <span class="n">row1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;td&gt;&lt;img src="</span><span class="si">{</span><span class="n">rel_barchart_path</span><span class="si">}</span><span class="s1">" width="400"&gt;&lt;/td&gt;'</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">acc</span> <span class="o">==</span> <span class="s2">"New_Acc"</span><span class="p">:</span>
-                        <span class="n">row2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;td&gt;&lt;img src="</span><span class="si">{</span><span class="n">rel_barchart_path</span><span class="si">}</span><span class="s1">" width="400"&gt;&lt;/td&gt;'</span><span class="p">)</span>
-                    <span class="k">elif</span> <span class="n">acc</span> <span class="o">==</span> <span class="s2">"Old_Acc"</span><span class="p">:</span>
-                        <span class="n">row2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'&lt;td&gt;&lt;img src="</span><span class="si">{</span><span class="n">rel_barchart_path</span><span class="si">}</span><span class="s1">" width="400"&gt;&lt;/td&gt;'</span><span class="p">)</span>
-
-            <span class="c1"># Ensure exactly 2 images per row</span>
-            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">row1</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">row1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"&lt;td&gt;&lt;/td&gt;"</span><span class="p">)</span>  <span class="c1"># Empty cell if missing images</span>
-            <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">row2</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">row2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"&lt;td&gt;&lt;/td&gt;"</span><span class="p">)</span>  <span class="c1"># Empty cell if missing images</span>
-
-            <span class="c1"># Combine rows into HTML</span>
-            <span class="n">html_content</span> <span class="o">+=</span> <span class="s2">"&lt;tr&gt;"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">row1</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"&lt;/tr&gt;"</span>
-            <span class="n">html_content</span> <span class="o">+=</span> <span class="s2">"&lt;tr&gt;"</span> <span class="o">+</span> <span class="s2">""</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">row2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"&lt;/tr&gt;"</span>
-            <span class="n">html_content</span> <span class="o">+=</span> <span class="s2">"&lt;/table&gt;&lt;br&gt;"</span>
-
-            <span class="c1"># Display the formatted layout</span>
-            <span class="n">display</span><span class="p">(</span><span class="n">HTML</span><span class="p">(</span><span class="n">html_content</span><span class="p">))</span>
+<div class="highlight hl-ipython3"><pre><span></span> 
 </pre></div>
 </div>
 </div>
